@@ -20,7 +20,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     internal var currentlySelectedIndex: Int = 0
     internal let mediaManager = LibraryMediaManager()
     internal var latestImageTapped = ""
-    internal let panGestureHelper = PanGestureHelper()
 
     // MARK: - Init
     
@@ -57,7 +56,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         
         setupCollectionView()
         registerForLibraryChanges()
-        panGestureHelper.registerForPanGesture(on: v)
         registerForTapOnPreview()
         refreshMediaRequest()
 
@@ -201,11 +199,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     
     @objc
     func tappedImage() {
-        if !panGestureHelper.isImageShown {
-            panGestureHelper.resetToOriginalState()
-            // no dragup? needed? dragDirection = .up
-            v.refreshImageCurtainAlpha()
-        }
+        v.refreshImageCurtainAlpha()
     }
     
     // MARK: - Permissions

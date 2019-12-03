@@ -44,12 +44,6 @@ extension YPLibraryVC {
         
         // Update preview.
         changeAsset(mediaManager.fetchResult[indexPath.row])
-        
-        // Bring preview down and keep selected cell visible.
-        panGestureHelper.resetToOriginalState()
-        if !panGestureHelper.isImageShown {
-            v.collectionView.scrollToItem(at: indexPath, at: .top, animated: true)
-        }
         v.refreshImageCurtainAlpha()
     }
     
@@ -165,12 +159,6 @@ extension YPLibraryVC: UICollectionViewDelegate {
         currentlySelectedIndex = indexPath.row
 
         changeAsset(mediaManager.fetchResult[indexPath.row])
-        panGestureHelper.resetToOriginalState()
-        
-        // Only scroll cell to top if preview is hidden.
-        if !panGestureHelper.isImageShown {
-            collectionView.scrollToItem(at: indexPath, at: .top, animated: true)
-        }
         v.refreshImageCurtainAlpha()
 
         if multipleSelectionEnabled {
