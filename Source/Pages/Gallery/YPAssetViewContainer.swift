@@ -12,27 +12,66 @@ import Stevia
 import AVFoundation
 
 /// The container for asset (video or image). It containts the YPAssetZoomableView.
-class YPAssetViewContainer: UIView {
-    public var zoomableView: YPAssetZoomableView?
+public class YPAssetViewContainer: UIView {
+    
+    public var allowCropping: Bool = true {
+        didSet {
+            guard YPConfig.library.allowSwitchingCrop else { return }
+            squareCropButton.isHidden = !allowCropping
+        }
+    }
+    
+    public enum CropRatio {
+        case sqaure
+        case nonSquare
+        
+        var ratio: CGFloat {
+            switch self {
+            case .sqaure:
+                return 1
+            case .nonSquare:
+                return YPConfig.library.nonSquareCropRatio ?? 1
+            }
+        }
+        
+        var opposite: Self {
+            switch self {
+            case .sqaure:
+                return .nonSquare
+            case .nonSquare:
+                return .sqaure
+            }
+        }
+    }
+    
+    public var currentCropRatio: CropRatio = {
+        if YPConfig.library.useSquareCropAsDefault {
+            return .sqaure
+        } else {
+            return .nonSquare
+        }
+    }() {
+        didSet {
+            previewView?.cropRatio = currentCropRatio.ratio
+        }
+    }
+    
+    public var previewView: AssetPreviewView?
     public let curtain = UIView()
     public let spinnerView = UIView()
     public let squareCropButton = UIButton()
-    public var onlySquare = YPConfig.library.onlySquare
     public var isShown = true
     
     private let spinner = UIActivityIndicatorView(style: .white)
     private var shouldCropToSquare = YPConfig.library.isSquareByDefault
-    private var isMultipleSelection = false
+    private var isMultipleSelection = true
 
-    override func awakeFromNib() {
+    override public func awakeFromNib() {
         super.awakeFromNib()
         clipsToBounds = true
         
-        for sv in subviews {
-            if let cv = sv as? YPAssetZoomableView {
-                zoomableView = cv
-                zoomableView?.myDelegate = self
-            }
+        if let previewView = subviews.first(where: { $0 is AssetPreviewView }) {
+            self.previewView = previewView as? AssetPreviewView
         }
         
         // TODO: Add tap gesture to play/pause. Add double tap gesture to square/unsquare
@@ -58,54 +97,17 @@ class YPAssetViewContainer: UIView {
         sv(squareCropButton)
         squareCropButton.size(42)
         |-15-squareCropButton
-        squareCropButton.Bottom == zoomableView!.Bottom - 15
+        squareCropButton.Bottom == previewView!.Bottom - 15
+        squareCropButton.isHidden = allowCropping
     }
     
     // MARK: - Square button
 
     @objc public func squareCropButtonTapped() {
-        if let zoomableView = zoomableView {
-            let z = zoomableView.zoomScale
-            shouldCropToSquare = (z >= 1 && z < zoomableView.squaredZoomScale)
-        }
-        zoomableView?.fitImage(shouldCropToSquare, animated: true)
-    }
-    
-    
-    public func refreshSquareCropButton() {
-        if onlySquare {
-            squareCropButton.isHidden = true
-        } else {
-            if let image = zoomableView?.assetImageView.image {
-                let isImageASquare = image.size.width == image.size.height
-                squareCropButton.isHidden = isImageASquare
-            }
-        }
-        
-        let shouldFit = YPConfig.library.onlySquare ? true : shouldCropToSquare
-        zoomableView?.fitImage(shouldFit)
-    }
-    
-    // MARK: - Multiple selection
-
-    /// Use this to update the multiple selection mode UI state for the YPAssetViewContainer
-    public func setMultipleSelectionMode(on: Bool) {
-        isMultipleSelection = on
-        refreshSquareCropButton()
+        currentCropRatio = currentCropRatio.opposite
     }
 }
 
-// MARK: - ZoomableViewDelegate
-extension YPAssetViewContainer: YPAssetZoomableViewDelegate {
-    public func ypAssetZoomableViewDidLayoutSubviews(_ zoomableView: YPAssetZoomableView) {
-        // Update play imageView position - bringing the playImageView from the videoView to assetViewContainer,
-        // but the controll for appearing it still in videoView.
-        if zoomableView.videoView.playImageView.isDescendant(of: self) == false {
-            self.addSubview(zoomableView.videoView.playImageView)
-            zoomableView.videoView.playImageView.centerInContainer()
-        }
-    }
-}
 
 // MARK: - Gesture recognizer Delegate
 extension YPAssetViewContainer: UIGestureRecognizerDelegate {

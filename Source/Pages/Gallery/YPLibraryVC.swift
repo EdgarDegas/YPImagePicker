@@ -81,8 +81,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                 return YPLibrarySelection(index: -1, assetIdentifier: asset.localIdentifier)
             }
 
-            multipleSelectionEnabled = selection.count > 1
-            v.assetViewContainer.setMultipleSelectionMode(on: multipleSelectionEnabled)
             v.collectionView.reloadData()
         }
     }
@@ -96,17 +94,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // When crop area changes in multiple selection mode,
-        // we need to update the scrollView values in order to restore
-        // them when user selects a previously selected item.
-        v.assetZoomableView.cropAreaDidChange = { [weak self] in
-            guard let strongSelf = self else {
-                return
-            }
-
-            strongSelf.updateCropInfo()
-        }
     }
     
     public override func viewDidAppear(_ animated: Bool) {
@@ -116,13 +103,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             .addTarget(self,
                        action: #selector(squareCropButtonTapped),
                        for: .touchUpInside)
-        
-        // Forces assetZoomableView to have a contentSize.
-        // otherwise 0 in first selection triggering the bug : "invalid image size 0x0"
-        // Also fits the first element to the square if the onlySquareFromLibrary = true
-        if !YPConfig.library.onlySquare && v.assetZoomableView.contentSize == CGSize(width: 0, height: 0) {
-            v.assetZoomableView.setZoomScale(1, animated: false)
-        }
         
         // Activate multiple selection when using `minNumberOfItems`
         if YPConfig.library.minNumberOfItems > 1 {
@@ -160,12 +140,12 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         if !multipleSelectionEnabled {
             selection.removeAll()
         }
-        
+
         // Prevent desactivating multiple selection when using `minNumberOfItems`
         if YPConfig.library.minNumberOfItems > 1 && multipleSelectionEnabled {
             return
         }
-        
+
         multipleSelectionEnabled = !multipleSelectionEnabled
 
         if multipleSelectionEnabled {
@@ -174,8 +154,8 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                 selection = [
                     YPLibrarySelection(index: currentlySelectedIndex,
                                        cropRect: v.currentCropRect(),
-                                       scrollViewContentOffset: v.assetZoomableView!.contentOffset,
-                                       scrollViewZoomScale: v.assetZoomableView!.zoomScale,
+                                       scrollViewContentOffset: .zero,
+                                       scrollViewZoomScale: 1,
                                        assetIdentifier: asset.localIdentifier)
                 ]
             }
@@ -184,7 +164,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             addToSelection(indexPath: IndexPath(row: currentlySelectedIndex, section: 0))
         }
 
-        v.assetViewContainer.setMultipleSelectionMode(on: multipleSelectionEnabled)
         v.collectionView.reloadData()
         checkLimit()
         delegate?.libraryViewDidToggleMultipleSelection(enabled: multipleSelectionEnabled)
@@ -306,22 +285,19 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         let completion = {
             self.v.hideLoader()
             self.delegate?.libraryViewFinishedLoading()
-            self.v.assetViewContainer.refreshSquareCropButton()
+            self.v.assetViewContainer.allowCropping = self.selection.count == 1
             self.updateCropInfo()
         }
         
         DispatchQueue.global(qos: .userInitiated).async {
             switch asset.mediaType {
             case .image:
-                self.v.assetZoomableView.setImage(asset,
-                                                  mediaManager: self.mediaManager,
-                                                  storedCropPosition: self.fetchStoredCrop(),
-                                                  completion: completion)
+                self.v.assetPreviewView.setImage(
+                    asset,
+                    mediaManager: self.mediaManager,
+                    completion: completion)
             case .video:
-                self.v.assetZoomableView.setVideo(asset,
-                                                  mediaManager: self.mediaManager,
-                                                  storedCropPosition: self.fetchStoredCrop(),
-                                                  completion: completion)
+                break
             case .audio, .unknown:
                 ()
             @unknown default:
@@ -364,8 +340,8 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         
         // Fill new values
         var selectedAsset = selection[selectedAssetIndex]
-        selectedAsset.scrollViewContentOffset = v.assetZoomableView.contentOffset
-        selectedAsset.scrollViewZoomScale = v.assetZoomableView.zoomScale
+        selectedAsset.scrollViewContentOffset = .zero
+        selectedAsset.scrollViewZoomScale = 1
         selectedAsset.cropRect = v.currentCropRect()
         
         // Replace
@@ -514,7 +490,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     // MARK: - Player
     
     func pausePlayer() {
-        v.assetZoomableView.videoView.pause()
+        
     }
     
     // MARK: - Deinit

@@ -15,7 +15,7 @@ final class YPLibraryView: UIView {
     let assetZoomableViewMinimalVisibleHeight: CGFloat  = 50
     
     @IBOutlet weak var collectionView: UICollectionView!
-    @IBOutlet weak var assetZoomableView: YPAssetZoomableView!
+    @IBOutlet weak var assetPreviewView: AssetPreviewView!
     @IBOutlet weak var assetViewContainer: YPAssetViewContainer!
     @IBOutlet weak var assetViewContainerConstraintTop: NSLayoutConstraint!
     
@@ -117,14 +117,7 @@ extension YPLibraryView {
     // MARK: - Crop Rect
     
     func currentCropRect() -> CGRect {
-        guard let cropView = assetZoomableView else {
-            return CGRect.zero
-        }
-        let normalizedX = min(1, cropView.contentOffset.x &/ cropView.contentSize.width)
-        let normalizedY = min(1, cropView.contentOffset.y &/ cropView.contentSize.height)
-        let normalizedWidth = min(1, cropView.frame.width / cropView.contentSize.width)
-        let normalizedHeight = min(1, cropView.frame.height / cropView.contentSize.height)
-        return CGRect(x: normalizedX, y: normalizedY, width: normalizedWidth, height: normalizedHeight)
+        .zero  // Won't use.
     }
     
     // MARK: - Curtain
