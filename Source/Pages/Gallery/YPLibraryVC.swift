@@ -64,7 +64,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         if YPConfig.library.defaultMultipleSelection {
             multipleSelectionButtonTapped()
         }
-        v.assetViewContainer.multipleSelectionButton.isHidden = !(YPConfig.library.maxNumberOfItems > 1)
         v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningMaxItemsLimit, YPConfig.library.maxNumberOfItems)
         
         if let preselectedItems = YPConfig.library.preselectedItems {
@@ -118,10 +117,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         v.assetViewContainer.squareCropButton
             .addTarget(self,
                        action: #selector(squareCropButtonTapped),
-                       for: .touchUpInside)
-        v.assetViewContainer.multipleSelectionButton
-            .addTarget(self,
-                       action: #selector(multipleSelectionButtonTapped),
                        for: .touchUpInside)
         
         // Forces assetZoomableView to have a contentSize.
