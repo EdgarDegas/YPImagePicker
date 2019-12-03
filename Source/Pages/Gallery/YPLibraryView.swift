@@ -96,12 +96,6 @@ extension YPLibraryView {
         return xibView
     }
     
-    // MARK: - Grid
-    
-    func hideGrid() {
-        assetViewContainer.grid.alpha = 0
-    }
-    
     // MARK: - Loader and progress
     
     func fadeInLoader() {

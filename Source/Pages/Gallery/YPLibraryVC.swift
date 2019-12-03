@@ -305,7 +305,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         
         let completion = {
             self.v.hideLoader()
-            self.v.hideGrid()
             self.delegate?.libraryViewFinishedLoading()
             self.v.assetViewContainer.refreshSquareCropButton()
             self.updateCropInfo()
@@ -375,8 +374,9 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     }
     
     internal func fetchStoredCrop() -> YPLibrarySelection? {
-        if self.multipleSelectionEnabled,
-            self.selection.contains(where: { $0.index == self.currentlySelectedIndex }) {
+        if multipleSelectionEnabled,
+           selection.contains(where: { $0.index == self.currentlySelectedIndex })
+        {
             guard let selectedAssetIndex = self.selection
                 .firstIndex(where: { $0.index == self.currentlySelectedIndex }) else {
                 return nil

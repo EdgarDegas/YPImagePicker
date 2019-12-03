@@ -11,10 +11,9 @@ import UIKit
 import Stevia
 import AVFoundation
 
-/// The container for asset (video or image). It containts the YPGridView and YPAssetZoomableView.
+/// The container for asset (video or image). It containts the YPAssetZoomableView.
 class YPAssetViewContainer: UIView {
     public var zoomableView: YPAssetZoomableView?
-    public let grid = YPGridView()
     public let curtain = UIView()
     public let spinnerView = UIView()
     public let squareCropButton = UIButton()
@@ -27,9 +26,6 @@ class YPAssetViewContainer: UIView {
 
     override func awakeFromNib() {
         super.awakeFromNib()
-        
-        addSubview(grid)
-        grid.frame = frame
         clipsToBounds = true
         
         for sv in subviews {
@@ -38,14 +34,6 @@ class YPAssetViewContainer: UIView {
                 zoomableView?.myDelegate = self
             }
         }
-        
-        grid.alpha = 0
-        
-        let touchDownGR = UILongPressGestureRecognizer(target: self,
-                                                       action: #selector(handleTouchDown))
-        touchDownGR.minimumPressDuration = 0
-        touchDownGR.delegate = self
-        addGestureRecognizer(touchDownGR)
         
         // TODO: Add tap gesture to play/pause. Add double tap gesture to square/unsquare
         
@@ -115,29 +103,11 @@ extension YPAssetViewContainer: YPAssetZoomableViewDelegate {
     public func ypAssetZoomableViewDidLayoutSubviews(_ zoomableView: YPAssetZoomableView) {
         let newFrame = zoomableView.assetImageView.convert(zoomableView.assetImageView.bounds, to: self)
         
-        // update grid position
-        grid.frame = frame.intersection(newFrame)
-        grid.layoutIfNeeded()
-        
         // Update play imageView position - bringing the playImageView from the videoView to assetViewContainer,
         // but the controll for appearing it still in videoView.
         if zoomableView.videoView.playImageView.isDescendant(of: self) == false {
             self.addSubview(zoomableView.videoView.playImageView)
             zoomableView.videoView.playImageView.centerInContainer()
-        }
-    }
-    
-    public func ypAssetZoomableViewScrollViewDidZoom() {
-        if isShown {
-            UIView.animate(withDuration: 0.1) {
-                self.grid.alpha = 1
-            }
-        }
-    }
-    
-    public func ypAssetZoomableViewScrollViewDidEndZooming() {
-        UIView.animate(withDuration: 0.3) {
-            self.grid.alpha = 0
         }
     }
 }
@@ -151,22 +121,5 @@ extension YPAssetViewContainer: UIGestureRecognizerDelegate {
     
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
         return !(touch.view is UIButton)
-    }
-    
-    @objc
-    private func handleTouchDown(sender: UILongPressGestureRecognizer) {
-        switch sender.state {
-        case .began:
-            if isShown {
-                UIView.animate(withDuration: 0.1) {
-                    self.grid.alpha = 1
-                }
-            }
-        case .ended:
-            UIView.animate(withDuration: 0.3) {
-                self.grid.alpha = 0
-            }
-        default: ()
-        }
     }
 }
