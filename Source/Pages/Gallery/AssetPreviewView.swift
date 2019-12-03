@@ -68,6 +68,7 @@ extension AssetPreviewView {
 // MARK: - Setup
 private extension AssetPreviewView {
     func load() {
+        backgroundColor = YPConfig.colors.assetViewBackgroundColor
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
