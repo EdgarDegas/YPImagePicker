@@ -12,6 +12,8 @@ import Photos
 
 final class YPLibraryView: UIView {
     
+    var currentRatio: CGFloat = 1
+    
     let assetZoomableViewMinimalVisibleHeight: CGFloat  = 50
     
     @IBOutlet weak var collectionView: UICollectionView!
@@ -40,6 +42,9 @@ final class YPLibraryView: UIView {
         
         setupMaxNumberOfItemsView()
         setupProgressBarView()
+        assetViewContainer.cropRatioDidChangeHandler = { [unowned self] ratio in
+            self.currentRatio = ratio
+        }
     }
     
     /// At the bottom there is a view that is visible when selected a limit of items with multiple selection
@@ -112,12 +117,6 @@ extension YPLibraryView {
         progressView.isHidden = progress > 0.99 || progress == 0
         progressView.progress = progress
         UIView.animate(withDuration: 0.1, animations: progressView.layoutIfNeeded)
-    }
-    
-    // MARK: - Crop Rect
-    
-    func currentCropRect() -> CGRect {
-        .zero  // Won't use.
     }
     
     // MARK: - Curtain

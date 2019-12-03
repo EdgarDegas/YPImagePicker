@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import Stevia
 import AVFoundation
+import Photos
 
 /// The container for asset (video or image). It containts the YPAssetZoomableView.
 public class YPAssetViewContainer: UIView {
@@ -20,6 +21,8 @@ public class YPAssetViewContainer: UIView {
             squareCropButton.isHidden = !allowCropping
         }
     }
+    
+    var cropRatioDidChangeHandler: ((_ ratio: CGFloat) -> Void)?
     
     public enum CropRatio {
         case sqaure
@@ -53,6 +56,8 @@ public class YPAssetViewContainer: UIView {
     }() {
         didSet {
             previewView?.cropRatio = currentCropRatio.ratio
+            guard let currentAsset = previewView?.currentAsset else { return }
+            cropRatioDidChangeHandler?(currentCropRatio.ratio)
         }
     }
     

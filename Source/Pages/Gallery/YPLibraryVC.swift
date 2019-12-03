@@ -14,7 +14,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     internal weak var delegate: YPLibraryViewDelegate?
     internal var v: YPLibraryView!
     internal var isProcessing = false // true if video or image is in processing state
-    internal var multipleSelectionEnabled = false
     internal var initialized = false
     internal var selection = [YPLibrarySelection]()
     internal var currentlySelectedIndex: Int = 0
@@ -40,9 +39,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         title = album.title
         mediaManager.collection = album.collection
         currentlySelectedIndex = 0
-        if !multipleSelectionEnabled {
-            selection.removeAll()
-        }
+        selection.removeAll()
         refreshMediaRequest()
     }
     
@@ -137,36 +134,25 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     }
     
     private func showMultipleSelection() {
-        if !multipleSelectionEnabled {
-            selection.removeAll()
-        }
+        selection.removeAll()
 
         // Prevent desactivating multiple selection when using `minNumberOfItems`
-        if YPConfig.library.minNumberOfItems > 1 && multipleSelectionEnabled {
+        if YPConfig.library.minNumberOfItems > 1 {
             return
         }
 
-        multipleSelectionEnabled = !multipleSelectionEnabled
-
-        if multipleSelectionEnabled {
-            if selection.isEmpty {
-                let asset = mediaManager.fetchResult[currentlySelectedIndex]
-                selection = [
-                    YPLibrarySelection(index: currentlySelectedIndex,
-                                       cropRect: v.currentCropRect(),
-                                       scrollViewContentOffset: .zero,
-                                       scrollViewZoomScale: 1,
-                                       assetIdentifier: asset.localIdentifier)
-                ]
-            }
-        } else {
-            selection.removeAll()
-            addToSelection(indexPath: IndexPath(row: currentlySelectedIndex, section: 0))
+        if selection.isEmpty {
+            let asset = mediaManager.fetchResult[currentlySelectedIndex]
+            selection = [
+                YPLibrarySelection(
+                    index: currentlySelectedIndex,
+                    assetIdentifier: asset.localIdentifier)
+            ]
         }
 
         v.collectionView.reloadData()
         checkLimit()
-        delegate?.libraryViewDidToggleMultipleSelection(enabled: multipleSelectionEnabled)
+        delegate?.libraryViewDidToggleMultipleSelection(enabled: true)
     }
     
     // MARK: - Tap Preview
@@ -245,9 +231,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             v.collectionView.selectItem(at: IndexPath(row: 0, section: 0),
                                              animated: false,
                                              scrollPosition: UICollectionView.ScrollPosition())
-            if !multipleSelectionEnabled {
-                addToSelection(indexPath: IndexPath(row: 0, section: 0))
-            }
+            addToSelection(indexPath: IndexPath(row: 0, section: 0))
         } else {
             delegate?.noPhotosForOptions()
         }
@@ -338,21 +322,13 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             return
         }
         
-        // Fill new values
-        var selectedAsset = selection[selectedAssetIndex]
-        selectedAsset.scrollViewContentOffset = .zero
-        selectedAsset.scrollViewZoomScale = 1
-        selectedAsset.cropRect = v.currentCropRect()
-        
-        // Replace
+        let selectedAsset = selection[selectedAssetIndex]
         selection.remove(at: selectedAssetIndex)
         selection.insert(selectedAsset, at: selectedAssetIndex)
     }
     
     internal func fetchStoredCrop() -> YPLibrarySelection? {
-        if multipleSelectionEnabled,
-           selection.contains(where: { $0.index == self.currentlySelectedIndex })
-        {
+        if selection.contains(where: { $0.index == self.currentlySelectedIndex }) {
             guard let selectedAssetIndex = self.selection
                 .firstIndex(where: { $0.index == self.currentlySelectedIndex }) else {
                 return nil
@@ -369,29 +345,33 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     // MARK: - Fetching Media
     
     private func fetchImageAndCrop(for asset: PHAsset,
-                                   withCropRect: CGRect? = nil,
+                                   withCropRatio cropRatio: CGFloat? = nil,
                                    callback: @escaping (_ photo: UIImage, _ exif: [String : Any]) -> Void) {
         delegate?.libraryViewStartedLoading()
-        let cropRect = withCropRect ?? DispatchQueue.main.sync { v.currentCropRect() }
-        let ts = targetSize(for: asset, cropRect: cropRect)
-        mediaManager.imageManager?.fetchImage(for: asset, cropRect: cropRect, targetSize: ts, callback: callback)
+        let cropRatio = cropRatio ?? DispatchQueue.main.sync { v.currentRatio }
+        let ts = targetSize(for: asset, cropRatio: cropRatio)
+        mediaManager.imageManager?.fetchImage(
+            for: asset,
+            cropRatio: cropRatio,
+            targetSize: ts,
+            callback: callback)
     }
     
     private func checkVideoLengthAndCrop(for asset: PHAsset,
                                          withCropRect: CGRect? = nil,
                                          callback: @escaping (_ videoURL: URL) -> Void) {
-        if fitsVideoLengthLimits(asset: asset) == true {
-            delegate?.libraryViewStartedLoading()
-            let normalizedCropRect = withCropRect ?? DispatchQueue.main.sync { v.currentCropRect() }
-            let ts = targetSize(for: asset, cropRect: normalizedCropRect)
-            let xCrop: CGFloat = normalizedCropRect.origin.x * CGFloat(asset.pixelWidth)
-            let yCrop: CGFloat = normalizedCropRect.origin.y * CGFloat(asset.pixelHeight)
-            let resultCropRect = CGRect(x: xCrop,
-                                        y: yCrop,
-                                        width: ts.width,
-                                        height: ts.height)
-            mediaManager.fetchVideoUrlAndCrop(for: asset, cropRect: resultCropRect, callback: callback)
-        }
+//        if fitsVideoLengthLimits(asset: asset) == true {
+//            delegate?.libraryViewStartedLoading()
+//            let ratio = withCropRect ?? DispatchQueue.main.sync { v.currentRatio }
+//            let ts = targetSize(for: asset, cropRect: normalizedCropRect)
+//            let xCrop: CGFloat = normalizedCropRect.origin.x * CGFloat(asset.pixelWidth)
+//            let yCrop: CGFloat = normalizedCropRect.origin.y * CGFloat(asset.pixelHeight)
+//            let resultCropRect = CGRect(x: xCrop,
+//                                        y: yCrop,
+//                                        width: ts.width,
+//                                        height: ts.height)
+//            mediaManager.fetchVideoUrlAndCrop(for: asset, cropRect: resultCropRect, callback: callback)
+//        }
     }
     
     public func selectedMedia(photoCallback: @escaping (_ photo: YPMediaPhoto) -> Void,
@@ -405,7 +385,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             }
             
             // Multiple selection
-            if self.multipleSelectionEnabled && self.selection.count > 1 {
+            if self.selection.count > 1 {
                 
                 // Check video length
                 for asset in selectedAssets {
@@ -423,19 +403,20 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                     
                     switch asset.asset.mediaType {
                     case .image:
-                        self.fetchImageAndCrop(for: asset.asset, withCropRect: asset.cropRect) { image, exifMeta in
+                        self.fetchImageAndCrop(for: asset.asset) { image, exifMeta in
                             let photo = YPMediaPhoto(image: image.resizedImageIfNeeded(), exifMeta: exifMeta, asset: asset.asset)
                             resultMediaItems.append(YPMediaItem.photo(p: photo))
                             asyncGroup.leave()
                         }
                         
                     case .video:
-                        self.checkVideoLengthAndCrop(for: asset.asset, withCropRect: asset.cropRect) { videoURL in
-                            let videoItem = YPMediaVideo(thumbnail: thumbnailFromVideoPath(videoURL),
-                                                         videoURL: videoURL, asset: asset.asset)
-                            resultMediaItems.append(YPMediaItem.video(v: videoItem))
-                            asyncGroup.leave()
-                        }
+//                        self.checkVideoLengthAndCrop(for: asset.asset, withCropRect: asset.cropRect) { videoURL in
+//                            let videoItem = YPMediaVideo(thumbnail: thumbnailFromVideoPath(videoURL),
+//                                                         videoURL: videoURL, asset: asset.asset)
+//                            resultMediaItems.append(YPMediaItem.video(v: videoItem))
+//                            asyncGroup.leave()
+//                        }
+                        break
                     default:
                         break
                     }
@@ -478,13 +459,14 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     
     // MARK: - TargetSize
     
-    private func targetSize(for asset: PHAsset, cropRect: CGRect) -> CGSize {
-        var width = (CGFloat(asset.pixelWidth) * cropRect.width).rounded(.toNearestOrEven)
-        var height = (CGFloat(asset.pixelHeight) * cropRect.height).rounded(.toNearestOrEven)
-        // round to lowest even number
-        width = (width.truncatingRemainder(dividingBy: 2) == 0) ? width : width - 1
-        height = (height.truncatingRemainder(dividingBy: 2) == 0) ? height : height - 1
-        return CGSize(width: width, height: height)
+    private func targetSize(for asset: PHAsset, cropRatio: CGFloat) -> CGSize {
+        let width = CGFloat(asset.pixelWidth)
+        let height = CGFloat(asset.pixelHeight)
+        if width > height {
+            return .init(width: height * cropRatio, height: height)
+        } else {
+            return .init(width: width, height: width / cropRatio)
+        }
     }
     
     // MARK: - Player

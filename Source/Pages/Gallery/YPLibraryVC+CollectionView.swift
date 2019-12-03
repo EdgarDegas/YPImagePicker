@@ -25,7 +25,7 @@ extension YPLibraryVC {
     
     /// When tapping on the cell with long press, clear all previously selected cells.
     @objc func handleLongPress(longPressGR: UILongPressGestureRecognizer) {
-        if multipleSelectionEnabled || isProcessing || YPConfig.library.maxNumberOfItems <= 1 {
+        if isProcessing || YPConfig.library.maxNumberOfItems <= 1 {
             return
         }
         
@@ -93,7 +93,7 @@ extension YPLibraryVC {
     
     /// Checks if there can be selected more items. If no - present warning.
     func checkLimit() {
-        v.maxNumberWarningView.isHidden = !isLimitExceeded || multipleSelectionEnabled == false
+        v.maxNumberWarningView.isHidden = !isLimitExceeded
     }
 }
 
@@ -129,7 +129,6 @@ extension YPLibraryVC: UICollectionViewDelegate {
         let isVideo = (asset.mediaType == .video)
         cell.durationLabel.isHidden = !isVideo
         cell.durationLabel.text = isVideo ? YPHelper.formattedStrigFrom(asset.duration) : ""
-        cell.multipleSelectionIndicator.isHidden = !multipleSelectionEnabled
         cell.isSelected = currentlySelectedIndex == indexPath.row
         
         // Set correct selection number
@@ -161,28 +160,16 @@ extension YPLibraryVC: UICollectionViewDelegate {
         changeAsset(mediaManager.fetchResult[indexPath.row])
         v.refreshImageCurtainAlpha()
 
-        if multipleSelectionEnabled {
-            
-            let cellIsInTheSelectionPool = isInSelectionPool(indexPath: indexPath)
-            let cellIsCurrentlySelected = previouslySelectedIndexPath.row == currentlySelectedIndex
-
-            if cellIsInTheSelectionPool {
-                if cellIsCurrentlySelected {
-                    deselect(indexPath: indexPath)
-                }
-            } else if isLimitExceeded == false {
-                addToSelection(indexPath: indexPath)
+        let cellIsInTheSelectionPool = isInSelectionPool(indexPath: indexPath)
+        let cellIsCurrentlySelected = previouslySelectedIndexPath.row == currentlySelectedIndex
+        
+        if cellIsInTheSelectionPool {
+            if cellIsCurrentlySelected {
+                deselect(indexPath: indexPath)
             }
-        } else {
-            let previouslySelectedIndices = selection
-            selection.removeAll()
+        } else if isLimitExceeded == false {
             addToSelection(indexPath: indexPath)
-            if let selectedRow = previouslySelectedIndices.first?.index {
-                let previouslySelectedIndexPath = IndexPath(row: selectedRow, section: 0)
-                collectionView.reloadItems(at: [previouslySelectedIndexPath])
-            }
         }
-
         collectionView.reloadItems(at: [indexPath])
         collectionView.reloadItems(at: [previouslySelectedIndexPath])
     }
