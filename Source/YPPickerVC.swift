@@ -46,7 +46,7 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
     open override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = UIColor(r: 247, g: 247, b: 247)
+        view.backgroundColor = YPConfig.colors.libraryScreenBackgroundColor
         
         delegate = self
         
@@ -233,6 +233,7 @@ open class YPPickerVC: YPBottomPager, YPBottomPagerDelegate {
         } else {
             let arrow = UIImageView()
             arrow.image = YPConfig.icons.arrowDownIcon
+            arrow.tintColor = YPConfig.colors.tintColor
             
             let attributes = UINavigationBar.appearance().titleTextAttributes
             if let attributes = attributes, let foregroundColor = attributes[NSAttributedString.Key.foregroundColor] as? UIColor {

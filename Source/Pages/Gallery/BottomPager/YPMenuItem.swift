@@ -43,7 +43,7 @@ final class YPMenuItem: UIView {
         textLabel.style { l in
             l.textAlignment = .center
             l.font = UIFont.systemFont(ofSize: 17, weight: UIFont.Weight.medium)
-            l.textColor = self.unselectedColor()
+            l.textColor = YPConfig.colors.tintColor
             l.adjustsFontSizeToFitWidth = true
             l.numberOfLines = 2
         }
