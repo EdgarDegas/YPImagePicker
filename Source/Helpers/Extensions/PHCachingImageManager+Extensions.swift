@@ -20,21 +20,23 @@ extension PHCachingImageManager {
         return options
     }
     
-    func fetchImage(for asset: PHAsset, cropRect: CGRect, targetSize: CGSize, callback: @escaping (UIImage, [String: Any]) -> Void) {
+    func fetchImage(for asset: PHAsset, cropRatio: CGFloat, targetSize: CGSize, callback: @escaping (UIImage, [String: Any]) -> Void) {
         let options = photoImageRequestOptions()
     
         // Fetch Highiest quality image possible.
         requestImageData(for: asset, options: options) { data, dataUTI, CTFontOrientation, info in
             if let data = data, let image = UIImage(data: data)?.resetOrientation() {
-            
+                let width = CGFloat(asset.pixelWidth)
+                let height = CGFloat(asset.pixelHeight)
+                var rect = CGRect(origin: .zero, size: targetSize)
+                if width > height * cropRatio {
+                    rect.origin.x = width / 2 - height / 2 * cropRatio
+                } else {
+                    rect.origin.y = height / 2 - width / (2 * cropRatio)
+                }
+                
                 // Crop the high quality image manually.
-                let xCrop: CGFloat = cropRect.origin.x * CGFloat(asset.pixelWidth)
-                let yCrop: CGFloat = cropRect.origin.y * CGFloat(asset.pixelHeight)
-                let scaledCropRect = CGRect(x: xCrop,
-                                            y: yCrop,
-                                            width: targetSize.width,
-                                            height: targetSize.height)
-                if let imageRef = image.cgImage?.cropping(to: scaledCropRect) {
+                if let imageRef = image.cgImage?.cropping(to: rect) {
                     let croppedImage = UIImage(cgImage: imageRef)
                     let exifs = self.metadataForImageData(data: data)
                     callback(croppedImage, exifs)

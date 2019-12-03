@@ -162,6 +162,15 @@ public struct YPConfigLibrary {
     /// Set this to true if you want to force the library output to be a squared image. Defaults to false.
     public var onlySquare = false
     
+    /// Whether the user is allowed to switch between the square / non-square crop mode.
+    public var allowSwitchingCrop: Bool = true
+    
+    /// Which crop the picker uses when presented.
+    public var useSquareCropAsDefault: Bool = true
+    
+    /// The user can switch between square crop or crop applying this ratio (w/h).
+    public var nonSquareCropRatio: CGFloat? = nil
+    
     /// Sets the cropping style to square or not. Ignored if `onlySquare` is true. Defaults to true.
     public var isSquareByDefault = true
     
