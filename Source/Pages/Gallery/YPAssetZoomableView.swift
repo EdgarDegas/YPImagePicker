@@ -209,11 +209,14 @@ final class YPAssetZoomableView: UIScrollView {
         showsHorizontalScrollIndicator = false
         showsVerticalScrollIndicator = false
         delegate = self
+        maximumZoomScale = 6
+        minimumZoomScale = 1
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
         myDelegate?.ypAssetZoomableViewDidLayoutSubviews(self)
+        pinchGestureRecognizer?.isEnabled = false
     }
 }
 
