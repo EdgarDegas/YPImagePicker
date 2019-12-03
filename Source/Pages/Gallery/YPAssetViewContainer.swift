@@ -53,14 +53,12 @@ class YPAssetViewContainer: UIView {
         curtain.backgroundColor = UIColor.black.withAlphaComponent(0.7)
         curtain.alpha = 0
         
-        if !onlySquare {
-            // Crop Button
-            squareCropButton.setImage(YPConfig.icons.cropIcon, for: .normal)
-            sv(squareCropButton)
-            squareCropButton.size(42)
-            |-15-squareCropButton
-            squareCropButton.Bottom == zoomableView!.Bottom - 15
-        }
+        // Crop Button
+        squareCropButton.setImage(YPConfig.icons.cropIcon, for: .normal)
+        sv(squareCropButton)
+        squareCropButton.size(42)
+        |-15-squareCropButton
+        squareCropButton.Bottom == zoomableView!.Bottom - 15
     }
     
     // MARK: - Square button
@@ -93,7 +91,6 @@ class YPAssetViewContainer: UIView {
     /// Use this to update the multiple selection mode UI state for the YPAssetViewContainer
     public func setMultipleSelectionMode(on: Bool) {
         isMultipleSelection = on
-        let image = on ? YPConfig.icons.multipleSelectionOnIcon : YPConfig.icons.multipleSelectionOffIcon
         refreshSquareCropButton()
     }
 }
@@ -101,8 +98,6 @@ class YPAssetViewContainer: UIView {
 // MARK: - ZoomableViewDelegate
 extension YPAssetViewContainer: YPAssetZoomableViewDelegate {
     public func ypAssetZoomableViewDidLayoutSubviews(_ zoomableView: YPAssetZoomableView) {
-        let newFrame = zoomableView.assetImageView.convert(zoomableView.assetImageView.bounds, to: self)
-        
         // Update play imageView position - bringing the playImageView from the videoView to assetViewContainer,
         // but the controll for appearing it still in videoView.
         if zoomableView.videoView.playImageView.isDescendant(of: self) == false {
