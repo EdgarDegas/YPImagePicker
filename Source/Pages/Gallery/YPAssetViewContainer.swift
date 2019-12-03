@@ -98,7 +98,6 @@ public class YPAssetViewContainer: UIView {
         squareCropButton.size(42)
         |-15-squareCropButton
         squareCropButton.Bottom == previewView!.Bottom - 15
-        squareCropButton.isHidden = allowCropping
     }
     
     // MARK: - Square button

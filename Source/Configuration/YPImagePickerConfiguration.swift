@@ -168,7 +168,7 @@ public struct YPConfigLibrary {
     /// Which crop the picker uses when presented.
     public var useSquareCropAsDefault: Bool = true
     
-    /// The user can switch between square crop or crop applying this ratio.
+    /// The user can switch between square crop or crop applying this ratio (w/h).
     public var nonSquareCropRatio: CGFloat? = nil
     
     /// Sets the cropping style to square or not. Ignored if `onlySquare` is true. Defaults to true.
