@@ -71,7 +71,7 @@ final class YPAssetZoomableView: UIScrollView {
             
             strongSelf.videoView.setPreviewImage(preview)
             
-            strongSelf.setAssetFrame()
+            strongSelf.setAssetFrame(for: strongSelf.videoView, with: preview)
             
             completion()
             
@@ -112,7 +112,9 @@ final class YPAssetZoomableView: UIScrollView {
             }
             
             strongSelf.photoImageView.image = image
-            strongSelf.setAssetFrame()
+           
+            strongSelf.setAssetFrame(for: strongSelf.photoImageView, with: image)
+        
             completion()
             
             // Stored crop position in multiple selection
@@ -122,12 +124,44 @@ final class YPAssetZoomableView: UIScrollView {
         }
     }
     
-    fileprivate func setAssetFrame() {
+    fileprivate func setAssetFrame(`for` view: UIView, with image: UIImage) {
+        // Reseting the previous scale
+        self.minimumZoomScale = 1
+        self.zoomScale = 1
+        
         // Calculating and setting the image view frame depending on screenWidth
         let screenWidth: CGFloat = UIScreen.main.bounds.width
-        bounds.size.width = screenWidth * 3 / 4
+        let w = image.size.width
+        let h = image.size.height
+
+        var aspectRatio: CGFloat = 1
+        var zoomScale: CGFloat = 1
+
+        if w > h { // Landscape
+            aspectRatio = h / w
+            view.frame.size.width = screenWidth
+            view.frame.size.height = screenWidth * aspectRatio
+        } else if h > w { // Portrait
+            aspectRatio = w / h
+            view.frame.size.width = screenWidth * aspectRatio
+            view.frame.size.height = screenWidth
+            
+            if let minWidth = minWidth {
+                let k = minWidth / screenWidth
+                zoomScale = (h / w) * k
+            }
+        } else { // Square
+            view.frame.size.width = screenWidth
+            view.frame.size.height = screenWidth
+        }
         
+        // Centering image view
+        view.center = center
         centerAssetView()
+        
+        // Setting new scale
+        minimumZoomScale = zoomScale
+        self.zoomScale = zoomScale
     }
     
     /// Calculate zoom scale which will fit the image to square
@@ -182,7 +216,6 @@ final class YPAssetZoomableView: UIScrollView {
     override func layoutSubviews() {
         super.layoutSubviews()
         myDelegate?.ypAssetZoomableViewDidLayoutSubviews(self)
-        pinchGestureRecognizer?.isEnabled = false
     }
 }
 
