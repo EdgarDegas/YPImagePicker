@@ -15,7 +15,8 @@ public struct YPIcons {
     
     public var backButtonIcon: UIImage = imageFromBundle("yp_arrow_left")
     public var arrowDownIcon: UIImage = imageFromBundle("yp_arrow_down")
-    public var cropIcon: UIImage = imageFromBundle("yp_iconCrop")
+    public var cropIconSquare: UIImage = imageFromBundle("crop_square")
+    public var cropIconNonsquare: UIImage = imageFromBundle("crop_nonsquare")
     public var flashOnIcon: UIImage = imageFromBundle("yp_iconFlash_on")
     public var flashOffIcon: UIImage = imageFromBundle("yp_iconFlash_off")
     public var flashAutoIcon: UIImage = imageFromBundle("yp_iconFlash_auto")
