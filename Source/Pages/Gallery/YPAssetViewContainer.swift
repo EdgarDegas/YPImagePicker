@@ -45,6 +45,15 @@ public class YPAssetViewContainer: UIView {
                 return .sqaure
             }
         }
+        
+        var icon: UIImage {
+            switch self {
+            case .sqaure:
+                return YPConfig.icons.cropIconSquare
+            case .nonSquare:
+                return YPConfig.icons.cropIconNonsquare
+            }
+        }
     }
     
     public var currentCropRatio: CropRatio = {
@@ -56,7 +65,7 @@ public class YPAssetViewContainer: UIView {
     }() {
         didSet {
             previewView?.cropRatio = currentCropRatio.ratio
-            guard let currentAsset = previewView?.currentAsset else { return }
+            squareCropButton.setImage(currentCropRatio.icon, for: .normal)
             cropRatioDidChangeHandler?(currentCropRatio.ratio)
         }
     }
@@ -98,7 +107,8 @@ public class YPAssetViewContainer: UIView {
         curtain.alpha = 0
         
         // Crop Button
-        squareCropButton.setImage(YPConfig.icons.cropIcon, for: .normal)
+        
+        squareCropButton.setImage(currentCropRatio.icon, for: .normal)
         sv(squareCropButton)
         squareCropButton.size(42)
         |-15-squareCropButton
