@@ -101,6 +101,13 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                        action: #selector(squareCropButtonTapped),
                        for: .touchUpInside)
         
+        // Forces assetZoomableView to have a contentSize.
+        // otherwise 0 in first selection triggering the bug : "invalid image size 0x0"
+        // Also fits the first element to the square if the onlySquareFromLibrary = true
+        if !YPConfig.library.onlySquare && v.assetZoomableView.contentSize == CGSize(width: 0, height: 0) {
+            v.assetZoomableView.setZoomScale(1, animated: false)
+        }
+        
         // Activate multiple selection when using `minNumberOfItems`
         if YPConfig.library.minNumberOfItems > 1 {
             multipleSelectionButtonTapped()
@@ -328,7 +335,9 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     }
     
     internal func fetchStoredCrop() -> YPLibrarySelection? {
-        if selection.contains(where: { $0.index == self.currentlySelectedIndex }) {
+        if multipleSelectionEnabled,
+           selection.contains(where: { $0.index == self.currentlySelectedIndex })
+        {
             guard let selectedAssetIndex = self.selection
                 .firstIndex(where: { $0.index == self.currentlySelectedIndex }) else {
                 return nil

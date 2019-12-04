@@ -326,7 +326,6 @@
 				99C6D69F1F1FB5C100711DB2 /* YPLibraryVC.swift */,
 				99C6D6A51F1FB5C100711DB2 /* YPAssetViewContainer.swift */,
 				99C6D6A41F1FB5C100711DB2 /* YPAssetZoomableView.swift */,
-				B3B3AB41239637E900FC1830 /* AssetPreviewView.swift */,
 				99CF6D20201B70A000487F77 /* YPLibraryVC+CollectionView.swift */,
 				99C6D6A11F1FB5C100711DB2 /* YPLibraryView.xib */,
 				99C6D6A01F1FB5C100711DB2 /* YPLibraryView.swift */,
