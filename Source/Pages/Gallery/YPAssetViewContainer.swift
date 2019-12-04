@@ -58,6 +58,8 @@ class YPAssetViewContainer: UIView {
         }
     }
     
+    var cropRatioDidChange: ((_ ratio: CGFloat) -> Void)?
+    
     public var currentCropRatio: CropRatio = {
         if YPConfig.library.useSquareCropAsDefault {
             return .sqaure
@@ -66,7 +68,7 @@ class YPAssetViewContainer: UIView {
         }
     }() {
         didSet {
-            
+            cropRatioDidChange?(currentCropRatio.ratio)
             squareCropButton.setImage(currentCropRatio.icon, for: .normal)
             cropRatioDidChangeHandler?(currentCropRatio.ratio)
         }
@@ -83,6 +85,9 @@ class YPAssetViewContainer: UIView {
 
     override public func awakeFromNib() {
         super.awakeFromNib()
+        
+        addSubview(grid)
+        grid.frame = frame
         clipsToBounds = true
         
         for sv in subviews {

@@ -166,7 +166,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                     index: currentlySelectedIndex,
                     cropRect: v.currentCropRect(),
                     scrollViewContentOffset: v.assetZoomableView!.contentOffset,
-                    scrollViewZoomScale: v.assetZoomableView!.zoomScale,
+                scrollViewZoomScale: v.assetZoomableView!.zoomScale,
                     assetIdentifier: asset.localIdentifier)
             ]
         }
@@ -359,8 +359,10 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     }
     
     internal func fetchStoredCrop() -> YPLibrarySelection? {
-        guard let selectedAssetIndex = self.selection
-            .firstIndex(where: { $0.index == self.currentlySelectedIndex })
+        guard
+            self.selection.contains(where: { $0.index == self.currentlySelectedIndex }),
+            let selectedAssetIndex = self.selection
+                .firstIndex(where: { $0.index == self.currentlySelectedIndex })
         else {
             return nil
         }

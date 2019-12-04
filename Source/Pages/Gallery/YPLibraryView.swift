@@ -20,6 +20,8 @@ final class YPLibraryView: UIView {
     @IBOutlet weak var assetZoomableView: YPAssetZoomableView!
     @IBOutlet weak var assetViewContainer: YPAssetViewContainer!
     @IBOutlet weak var assetViewContainerConstraintTop: NSLayoutConstraint!
+    @IBOutlet weak var zoomableViewAspectRatioConstraint: NSLayoutConstraint!
+    @IBOutlet weak var zoomableViewEqualWidthConstraint: NSLayoutConstraint!
     
     let maxNumberWarningView = UIView()
     let maxNumberWarningLabel = UILabel()
@@ -44,6 +46,16 @@ final class YPLibraryView: UIView {
         setupProgressBarView()
         assetViewContainer.cropRatioDidChangeHandler = { [unowned self] ratio in
             self.currentRatio = ratio
+        }
+        
+        assetViewContainer.backgroundColor = YPConfig.colors.libraryScreenBackgroundColor
+        
+        assetViewContainer.cropRatioDidChange = { [unowned self] ratio in
+            guard let height = self.assetZoomableView?.frame.size.height else { return }
+            let widthOffset = height - height * ratio
+            self.zoomableViewEqualWidthConstraint.constant = -widthOffset
+            self.zoomableViewAspectRatioConstraint.constant = ratio
+            self.assetZoomableView.fitImage(true)
         }
     }
     

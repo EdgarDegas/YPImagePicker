@@ -12,6 +12,8 @@ import Photos
 
 protocol YPAssetZoomableViewDelegate: class {
     func ypAssetZoomableViewDidLayoutSubviews(_ zoomableView: YPAssetZoomableView)
+    func ypAssetZoomableViewScrollViewDidZoom()
+    func ypAssetZoomableViewScrollViewDidEndZooming()
 }
 
 final class YPAssetZoomableView: UIScrollView {
@@ -205,12 +207,14 @@ final class YPAssetZoomableView: UIScrollView {
         clipsToBounds = true
         photoImageView.frame = CGRect(origin: CGPoint.zero, size: CGSize.zero)
         videoView.frame = CGRect(origin: CGPoint.zero, size: CGSize.zero)
-        isScrollEnabled = false
+        maximumZoomScale = 6.0
+        minimumZoomScale = 1
         showsHorizontalScrollIndicator = false
         showsVerticalScrollIndicator = false
         delegate = self
-        maximumZoomScale = 6
-        minimumZoomScale = 1
+        alwaysBounceHorizontal = true
+        alwaysBounceVertical = true
+        isScrollEnabled = true
     }
     
     override func layoutSubviews() {
@@ -226,6 +230,8 @@ extension YPAssetZoomableView: UIScrollViewDelegate {
     }
     
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        myDelegate?.ypAssetZoomableViewScrollViewDidZoom()
+        
         centerAssetView()
     }
     
@@ -236,6 +242,8 @@ extension YPAssetZoomableView: UIScrollViewDelegate {
         if YPConfig.library.onlySquare && scale < squaredZoomScale {
             self.fitImage(true, animated: true)
         }
+        
+        myDelegate?.ypAssetZoomableViewScrollViewDidEndZooming()
         cropAreaDidChange()
     }
     
