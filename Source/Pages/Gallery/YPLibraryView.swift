@@ -63,7 +63,7 @@ final class YPLibraryView: UIView {
             {
                 self.layoutIfNeeded()
             })
-            self.assetZoomableView.fitImage(withCropRatio: ratio, animated: true)
+            self.assetZoomableView.fitImage(withCropRatio: ratio)
         }
     }
     
