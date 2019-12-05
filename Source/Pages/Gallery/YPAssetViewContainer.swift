@@ -130,6 +130,7 @@ class YPAssetViewContainer: UIView {
         squareCropButton.size(42)
         |-15-squareCropButton
         squareCropButton.Bottom == zoomableView!.Bottom - 15
+        squareCropButton.isHidden = !YPConfig.library.allowSwitchingCrop
     }
     
     // MARK: - Square button
