@@ -12,8 +12,10 @@ import Stevia
 import AVFoundation
 import Photos
 
-/// The container for asset (video or image). It containts the YPAssetZoomableView.
-public class YPAssetViewContainer: UIView {
+/// The container for asset (video or image). It containts the YPGridView and YPAssetZoomableView.
+class YPAssetViewContainer: UIView {
+    public var zoomableView: YPAssetZoomableView?
+    public let grid = YPGridView()
     
     public var allowCropping: Bool = true {
         didSet {
@@ -56,6 +58,8 @@ public class YPAssetViewContainer: UIView {
         }
     }
     
+    var cropRatioDidChange: ((_ ratio: CGFloat) -> Void)?
+    
     public var currentCropRatio: CropRatio = {
         if YPConfig.library.useSquareCropAsDefault {
             return .sqaure
@@ -64,13 +68,12 @@ public class YPAssetViewContainer: UIView {
         }
     }() {
         didSet {
-            previewView?.cropRatio = currentCropRatio.ratio
+            cropRatioDidChange?(currentCropRatio.ratio)
             squareCropButton.setImage(currentCropRatio.icon, for: .normal)
             cropRatioDidChangeHandler?(currentCropRatio.ratio)
         }
     }
-    
-    public var previewView: AssetPreviewView?
+
     public let curtain = UIView()
     public let spinnerView = UIView()
     public let squareCropButton = UIButton()
@@ -82,11 +85,25 @@ public class YPAssetViewContainer: UIView {
 
     override public func awakeFromNib() {
         super.awakeFromNib()
+        
+        addSubview(grid)
+        grid.frame = frame
         clipsToBounds = true
         
-        if let previewView = subviews.first(where: { $0 is AssetPreviewView }) {
-            self.previewView = previewView as? AssetPreviewView
+        for sv in subviews {
+            if let cv = sv as? YPAssetZoomableView {
+                zoomableView = cv
+                zoomableView?.myDelegate = self
+            }
         }
+        
+        grid.alpha = 0
+        
+        let touchDownGR = UILongPressGestureRecognizer(target: self,
+                                                       action: #selector(handleTouchDown))
+        touchDownGR.minimumPressDuration = 0
+        touchDownGR.delegate = self
+        addGestureRecognizer(touchDownGR)
         
         // TODO: Add tap gesture to play/pause. Add double tap gesture to square/unsquare
         
@@ -112,7 +129,7 @@ public class YPAssetViewContainer: UIView {
         sv(squareCropButton)
         squareCropButton.size(42)
         |-15-squareCropButton
-        squareCropButton.Bottom == previewView!.Bottom - 15
+        squareCropButton.Bottom == zoomableView!.Bottom - 15
     }
     
     // MARK: - Square button
@@ -123,6 +140,38 @@ public class YPAssetViewContainer: UIView {
 }
 
 
+// MARK: - ZoomableViewDelegate
+extension YPAssetViewContainer: YPAssetZoomableViewDelegate {
+    public func ypAssetZoomableViewDidLayoutSubviews(_ zoomableView: YPAssetZoomableView) {
+        let newFrame = zoomableView.assetImageView.convert(zoomableView.assetImageView.bounds, to: self)
+        
+        // update grid position
+        grid.frame = frame.intersection(newFrame)
+        grid.layoutIfNeeded()
+        
+        // Update play imageView position - bringing the playImageView from the videoView to assetViewContainer,
+        // but the controll for appearing it still in videoView.
+        if zoomableView.videoView.playImageView.isDescendant(of: self) == false {
+            self.addSubview(zoomableView.videoView.playImageView)
+            zoomableView.videoView.playImageView.centerInContainer()
+        }
+    }
+    
+    public func ypAssetZoomableViewScrollViewDidZoom() {
+        if isShown {
+            UIView.animate(withDuration: 0.1) {
+                self.grid.alpha = 1
+            }
+        }
+    }
+    
+    public func ypAssetZoomableViewScrollViewDidEndZooming() {
+        UIView.animate(withDuration: 0.3) {
+            self.grid.alpha = 0
+        }
+    }
+}
+
 // MARK: - Gesture recognizer Delegate
 extension YPAssetViewContainer: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith
@@ -132,5 +181,22 @@ extension YPAssetViewContainer: UIGestureRecognizerDelegate {
     
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
         return !(touch.view is UIButton)
+    }
+    
+    @objc
+    private func handleTouchDown(sender: UILongPressGestureRecognizer) {
+        switch sender.state {
+        case .began:
+            if isShown {
+                UIView.animate(withDuration: 0.1) {
+                    self.grid.alpha = 1
+                }
+            }
+        case .ended:
+            UIView.animate(withDuration: 0.3) {
+                self.grid.alpha = 0
+            }
+        default: ()
+        }
     }
 }
