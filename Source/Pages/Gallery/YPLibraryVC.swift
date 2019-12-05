@@ -115,7 +115,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         // Forces assetZoomableView to have a contentSize.
         // otherwise 0 in first selection triggering the bug : "invalid image size 0x0"
         // Also fits the first element to the square if the onlySquareFromLibrary = true
-        if !YPConfig.library.onlySquare && v.assetZoomableView.contentSize == CGSize(width: 0, height: 0) {
+        if v.assetZoomableView.contentSize == CGSize(width: 0, height: 0) {
             v.assetZoomableView.setZoomScale(1, animated: false)
         }
         
@@ -302,12 +302,14 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
                     asset,
                     mediaManager: self.mediaManager,
                     storedCropPosition: self.fetchStoredCrop(),
+                    cropRatio: self.v.assetViewContainer.currentCropRatio.ratio,
                     completion: completion)
             case .video:
                 self.v.assetZoomableView.setVideo(
                     asset,
                     mediaManager: self.mediaManager,
                     storedCropPosition: self.fetchStoredCrop(),
+                    cropRatio: self.v.assetViewContainer.currentCropRatio.ratio,
                     completion: completion)
             case .audio, .unknown:
                 ()

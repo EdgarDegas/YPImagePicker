@@ -55,7 +55,15 @@ final class YPLibraryView: UIView {
             let widthOffset = height - height * ratio
             self.zoomableViewEqualWidthConstraint.constant = -widthOffset
             self.zoomableViewAspectRatioConstraint.constant = ratio
-            self.assetZoomableView.fitImage(true)
+            UIView.animate(
+                withDuration: 0.2,
+                delay: 0,
+                options: .curveEaseOut,
+                animations:
+            {
+                self.layoutIfNeeded()
+            })
+            self.assetZoomableView.fitImage(withCropRatio: ratio, animated: true)
         }
     }
     
