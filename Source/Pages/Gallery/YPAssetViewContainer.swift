@@ -58,8 +58,6 @@ class YPAssetViewContainer: UIView {
         }
     }
     
-    var cropRatioDidChange: ((_ ratio: CGFloat) -> Void)?
-    
     public var currentCropRatio: CropRatio = {
         if YPConfig.library.useSquareCropAsDefault {
             return .sqaure
@@ -68,7 +66,6 @@ class YPAssetViewContainer: UIView {
         }
     }() {
         didSet {
-            cropRatioDidChange?(currentCropRatio.ratio)
             squareCropButton.setImage(currentCropRatio.icon, for: .normal)
             cropRatioDidChangeHandler?(currentCropRatio.ratio)
         }
@@ -131,6 +128,15 @@ class YPAssetViewContainer: UIView {
         |-15-squareCropButton
         squareCropButton.Bottom == zoomableView!.Bottom - 15
         squareCropButton.isHidden = !YPConfig.library.allowSwitchingCrop
+    }
+    
+    private var initialCropRatioBeenSet = false
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard initialCropRatioBeenSet == false else { return }
+        initialCropRatioBeenSet = true
+        squareCropButton.setImage(currentCropRatio.icon, for: .normal)
+        cropRatioDidChangeHandler?(currentCropRatio.ratio)
     }
     
     // MARK: - Square button

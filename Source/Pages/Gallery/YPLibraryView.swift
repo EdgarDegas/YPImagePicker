@@ -46,11 +46,6 @@ final class YPLibraryView: UIView {
         setupProgressBarView()
         assetViewContainer.cropRatioDidChangeHandler = { [unowned self] ratio in
             self.currentRatio = ratio
-        }
-        
-        assetViewContainer.backgroundColor = YPConfig.colors.libraryScreenBackgroundColor
-        
-        assetViewContainer.cropRatioDidChange = { [unowned self] ratio in
             guard let height = self.assetZoomableView?.frame.size.height else { return }
             let widthOffset = height - height * ratio
             self.zoomableViewEqualWidthConstraint.constant = -widthOffset
@@ -65,6 +60,8 @@ final class YPLibraryView: UIView {
             })
             self.assetZoomableView.fitImage(withCropRatio: ratio)
         }
+        
+        assetViewContainer.backgroundColor = YPConfig.colors.libraryScreenBackgroundColor
     }
     
     /// At the bottom there is a view that is visible when selected a limit of items with multiple selection
