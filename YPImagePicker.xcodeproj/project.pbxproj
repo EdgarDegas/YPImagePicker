@@ -65,7 +65,6 @@
 		99CF6D29201B900400487F77 /* LibraryMediaManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99CF6D28201B900400487F77 /* LibraryMediaManager.swift */; };
 		99CF6D2B201CB96700487F77 /* YPVideoCaptureHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99CF6D2A201CB96700487F77 /* YPVideoCaptureHelper.swift */; };
 		99D1DC2B1F9788930047F0E0 /* YPImagePickerConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99D1DC2A1F9788930047F0E0 /* YPImagePickerConfiguration.swift */; };
-		B3B3AB42239637E900FC1830 /* AssetPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3B3AB41239637E900FC1830 /* AssetPreviewView.swift */; };
 		EB05F6E7214A7191002040AA /* YPVideoProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB05F6E6214A7191002040AA /* YPVideoProcessor.swift */; };
 		EB19A8F420AC41AE007F88D8 /* AVAssetTrack+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB19A8F320AC41AE007F88D8 /* AVAssetTrack+Extensions.swift */; };
 		EB1AB2EA20AC1DED00BFA79F /* CGFloat+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1AB2E920AC1DED00BFA79F /* CGFloat+Extensions.swift */; };
@@ -221,6 +220,7 @@
 				99C6D6971F1FB5C100711DB2 /* Resources */,
 				52412A941CA6114A0073C4BE /* Products */,
 				EB3251DE20878D5900A6190D /* Frameworks */,
+				B3DEB1262397E56A00DD9ABE /* Recovered References */,
 			);
 			indentWidth = 4;
 			sourceTree = "<group>";
@@ -326,7 +326,6 @@
 				99C6D69F1F1FB5C100711DB2 /* YPLibraryVC.swift */,
 				99C6D6A51F1FB5C100711DB2 /* YPAssetViewContainer.swift */,
 				99C6D6A41F1FB5C100711DB2 /* YPAssetZoomableView.swift */,
-				B3B3AB41239637E900FC1830 /* AssetPreviewView.swift */,
 				99CF6D20201B70A000487F77 /* YPLibraryVC+CollectionView.swift */,
 				99C6D6A11F1FB5C100711DB2 /* YPLibraryView.xib */,
 				99C6D6A01F1FB5C100711DB2 /* YPLibraryView.swift */,
@@ -371,6 +370,14 @@
 				99CF6D2A201CB96700487F77 /* YPVideoCaptureHelper.swift */,
 			);
 			path = Video;
+			sourceTree = "<group>";
+		};
+		B3DEB1262397E56A00DD9ABE /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				B3B3AB41239637E900FC1830 /* AssetPreviewView.swift */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		EB3251DE20878D5900A6190D /* Frameworks */ = {
@@ -609,7 +616,6 @@
 				EB65C4B5209321420037858B /* String+Extensions.swift in Sources */,
 				99019E532018CE19007325C2 /* YPPickerScreen.swift in Sources */,
 				99CF6D1F201B6B9E00487F77 /* CGRect+Extensions.swift in Sources */,
-				B3B3AB42239637E900FC1830 /* AssetPreviewView.swift in Sources */,
 				99CF6D1D201B6ABA00487F77 /* IndexSet+Extensions.swift in Sources */,
 				EB59F452208766B800811B7B /* YPVideoFiltersVC.swift in Sources */,
 				EB473E1D208E1B9E00D16105 /* AVAsset+Extensions.swift in Sources */,

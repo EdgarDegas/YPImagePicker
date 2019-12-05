@@ -158,9 +158,6 @@ public struct YPImagePickerConfiguration {
 public struct YPConfigLibrary {
     
     public var options: PHFetchOptions? = nil
-
-    /// Set this to true if you want to force the library output to be a squared image. Defaults to false.
-    public var onlySquare = false
     
     /// Whether the user is allowed to switch between the square / non-square crop mode.
     public var allowSwitchingCrop: Bool = true
