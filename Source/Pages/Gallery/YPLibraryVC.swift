@@ -364,7 +364,8 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         guard
             self.selection.contains(where: { $0.index == self.currentlySelectedIndex }),
             let selectedAssetIndex = self.selection
-                .firstIndex(where: { $0.index == self.currentlySelectedIndex })
+                .firstIndex(where: { $0.index == self.currentlySelectedIndex }),
+            self.selection.count > selectedAssetIndex 
         else {
             return nil
         }
