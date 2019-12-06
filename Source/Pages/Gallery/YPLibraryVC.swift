@@ -59,7 +59,13 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         if YPConfig.library.defaultMultipleSelection {
             multipleSelectionButtonTapped()
         }
-        v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningMaxItemsLimit, YPConfig.library.maxNumberOfItems)
+        
+        let maxNumberOfItems = YPConfig.library.maxNumberOfItems
+        if maxNumberOfItems > 1 {
+            v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningSingleItemLimit, maxNumberOfItems)
+        } else {
+            v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningMaxItemsLimit, maxNumberOfItems)
+        }
         
         if let preselectedItems = YPConfig.library.preselectedItems {
             selection = preselectedItems.compactMap { item -> YPLibrarySelection? in
