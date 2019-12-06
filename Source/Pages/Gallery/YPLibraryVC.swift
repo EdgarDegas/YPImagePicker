@@ -62,9 +62,9 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         
         let maxNumberOfItems = YPConfig.library.maxNumberOfItems
         if maxNumberOfItems > 1 {
-            v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningSingleItemLimit, maxNumberOfItems)
-        } else {
             v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningMaxItemsLimit, maxNumberOfItems)
+        } else {
+            v.maxNumberWarningLabel.text = String(format: YPConfig.wordings.warningSingleItemLimit, maxNumberOfItems)
         }
         
         if let preselectedItems = YPConfig.library.preselectedItems {
