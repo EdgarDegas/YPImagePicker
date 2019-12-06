@@ -171,9 +171,6 @@ public struct YPConfigLibrary {
     /// Sets the cropping style to square or not. Ignored if `onlySquare` is true. Defaults to true.
     public var isSquareByDefault = true
     
-    /// Minimum width, to prevent selectiong too high images. Have sense if onlySquare is true and the image is portrait.
-    public var minWidthForItem: CGFloat?
-    
     /// Choose what media types are available in the library. Defaults to `.photo`
     public var mediaType = YPlibraryMediaType.photo
 

@@ -24,7 +24,6 @@ final class YPAssetZoomableView: UIScrollView {
     public var photoImageView = UIImageView()
     public var videoView = YPVideoView()
     public var minimumScale: CGFloat = 1
-    public var minWidth: CGFloat? = YPConfig.library.minWidthForItem
     
     fileprivate var currentAsset: PHAsset?
     private var currentPreview: UIImage?
@@ -43,8 +42,6 @@ final class YPAssetZoomableView: UIScrollView {
             guard let currentPreview = self.currentPreview else { return }
             self.cropRatio = cropRatio
             self.setAssetFrame(for: self.assetImageView, with: currentPreview)
-            self.calculateMinimumZoomScale()
-            self.setZoomScale(self.minimumScale, animated: isAnimated)
         }
     }
     
@@ -149,63 +146,27 @@ final class YPAssetZoomableView: UIScrollView {
         self.zoomScale = 1
         
         // Calculating and setting the image view frame depending on screenWidth
-        let screenWidth: CGFloat = UIScreen.main.bounds.width
+        let boundsHeight = UIScreen.main.bounds.width
         let w = image.size.width
         let h = image.size.height
-
-        var aspectRatio: CGFloat = 1
-        var zoomScale: CGFloat = 1
-
-        if w > h { // Landscape
-            aspectRatio = h / w
-            view.frame.size.width = screenWidth
-            view.frame.size.height = screenWidth * aspectRatio
-        } else if h > w { // Portrait
-            aspectRatio = w / h
-            view.frame.size.width = screenWidth * aspectRatio
-            view.frame.size.height = screenWidth
-            
-            if let minWidth = minWidth {
-                let k = minWidth / screenWidth
-                zoomScale = (h / w) * k
-            }
-        } else { // Square
-            view.frame.size.width = screenWidth
-            view.frame.size.height = screenWidth
+        let aspectRatio = w / h
+        
+        if w > h * cropRatio {
+            let height = boundsHeight
+            view.frame.size.height = height
+            view.frame.size.width = height * aspectRatio
+        } else {
+            let width = boundsHeight * cropRatio
+            view.frame.size.width = width
+            view.frame.size.height = width / aspectRatio
         }
         
         // Centering image view
         view.center = center
         centerAssetView()
-        
-        // Setting new scale
-        minimumZoomScale = zoomScale
-        self.zoomScale = zoomScale
+        contentSize = view.frame.size
     }
-    
-    /// Calculate zoom scale which will fit the image to square
-    fileprivate func calculateMinimumZoomScale() {
-        guard let image = assetImageView.image else {
-            minimumScale = 1.0
-            return
-        }
-        
-        let boundsHeight = bounds.height
-        let boundsWidth = boundsHeight * cropRatio
-        
-        let w = image.size.width
-        let h = image.size.height
-        
-        var scale: CGFloat
-        if w > h * cropRatio {
-            scale = 1
-        } else {
-            scale = h * boundsWidth / (boundsHeight * w)
-        }
-        
-        minimumScale = scale
-    }
-    
+
     // Centring the image frame
     fileprivate func centerAssetView() {
         let assetView = isVideoMode ? videoView : photoImageView
