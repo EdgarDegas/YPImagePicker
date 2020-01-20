@@ -40,7 +40,7 @@ extension YPLibraryVC {
     
     func startMultipleSelection(at indexPath: IndexPath) {
         currentlySelectedIndex = indexPath.row
-        multipleSelectionButtonTapped()
+        enableMultiSelection()
         
         // Update preview.
         changeAsset(mediaManager.fetchResult[indexPath.row])

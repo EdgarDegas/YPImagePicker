@@ -57,7 +57,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         refreshMediaRequest()
 
         if YPConfig.library.defaultMultipleSelection {
-            multipleSelectionButtonTapped()
+            enableMultiSelection()
         }
         
         let maxNumberOfItems = YPConfig.library.maxNumberOfItems
@@ -127,7 +127,7 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
         
         // Activate multiple selection when using `minNumberOfItems`
         if YPConfig.library.minNumberOfItems > 1 {
-            multipleSelectionButtonTapped()
+            enableMultiSelection()
         }
     }
     
@@ -150,33 +150,20 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     
     // MARK: - Multiple Selection
 
-    @objc
-    func multipleSelectionButtonTapped() {
+    func enableMultiSelection() {
         doAfterPermissionCheck { [weak self] in
-            self?.showMultipleSelection()
+            self?.performEnablingMultipleSelection()
         }
     }
     
-    private func showMultipleSelection() {
+    private func performEnablingMultipleSelection() {
         selection.removeAll()
 
         // Prevent desactivating multiple selection when using `minNumberOfItems`
         if YPConfig.library.minNumberOfItems > 1 {
             return
         }
-
-        if selection.isEmpty {
-            let asset = mediaManager.fetchResult[currentlySelectedIndex]
-            selection = [
-                YPLibrarySelection(
-                    index: currentlySelectedIndex,
-                    cropRect: v.currentCropRect(),
-                    scrollViewContentOffset: v.assetZoomableView!.contentOffset,
-                scrollViewZoomScale: v.assetZoomableView!.zoomScale,
-                    assetIdentifier: asset.localIdentifier)
-            ]
-        }
-
+        
         v.collectionView.reloadData()
         checkLimit()
         delegate?.libraryViewDidToggleMultipleSelection(enabled: true)
@@ -258,7 +245,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             v.collectionView.selectItem(at: IndexPath(row: 0, section: 0),
                                              animated: false,
                                              scrollPosition: UICollectionView.ScrollPosition())
-            addToSelection(indexPath: IndexPath(row: 0, section: 0))
         } else {
             delegate?.noPhotosForOptions()
         }
