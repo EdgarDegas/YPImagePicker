@@ -24,51 +24,11 @@ class YPAssetViewContainer: UIView {
         }
     }
     
-    var cropRatioDidChangeHandler: ((_ ratio: CGFloat) -> Void)?
-    
-    public enum CropRatio {
-        case sqaure
-        case nonSquare
-        
-        var ratio: CGFloat {
-            switch self {
-            case .sqaure:
-                return 1
-            case .nonSquare:
-                return YPConfig.library.nonSquareCropRatio ?? 1
-            }
+    public var imageRatio: CGFloat? {
+        guard let image = zoomableView?.assetImageView.image else {
+            return nil
         }
-        
-        var opposite: Self {
-            switch self {
-            case .sqaure:
-                return .nonSquare
-            case .nonSquare:
-                return .sqaure
-            }
-        }
-        
-        var icon: UIImage {
-            switch self {
-            case .sqaure:
-                return YPConfig.icons.cropIconSquare
-            case .nonSquare:
-                return YPConfig.icons.cropIconNonsquare
-            }
-        }
-    }
-    
-    public var currentCropRatio: CropRatio = {
-        if YPConfig.library.useSquareCropAsDefault {
-            return .sqaure
-        } else {
-            return .nonSquare
-        }
-    }() {
-        didSet {
-            squareCropButton.setImage(currentCropRatio.icon, for: .normal)
-            cropRatioDidChangeHandler?(currentCropRatio.ratio)
-        }
+        return image.size.width / image.size.height
     }
 
     public let curtain = UIView()
@@ -102,8 +62,6 @@ class YPAssetViewContainer: UIView {
         touchDownGR.delegate = self
         addGestureRecognizer(touchDownGR)
         
-        // TODO: Add tap gesture to play/pause. Add double tap gesture to square/unsquare
-        
         sv(
             spinnerView.sv(
                 spinner
@@ -122,7 +80,6 @@ class YPAssetViewContainer: UIView {
         
         // Crop Button
         
-        squareCropButton.setImage(currentCropRatio.icon, for: .normal)
         sv(squareCropButton)
         squareCropButton.size(42)
         |-15-squareCropButton
@@ -130,20 +87,6 @@ class YPAssetViewContainer: UIView {
         squareCropButton.isHidden = !YPConfig.library.allowSwitchingCrop
     }
     
-    private var initialCropRatioBeenSet = false
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        guard initialCropRatioBeenSet == false else { return }
-        initialCropRatioBeenSet = true
-        squareCropButton.setImage(currentCropRatio.icon, for: .normal)
-        cropRatioDidChangeHandler?(currentCropRatio.ratio)
-    }
-    
-    // MARK: - Square button
-
-    @objc public func squareCropButtonTapped() {
-        currentCropRatio = currentCropRatio.opposite
-    }
 }
 
 

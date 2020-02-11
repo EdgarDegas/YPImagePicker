@@ -11,17 +11,31 @@ import Stevia
 import Photos
 
 final class YPLibraryView: UIView {
-    
-    var currentRatio: CGFloat = 1
-    
+
     let assetZoomableViewMinimalVisibleHeight: CGFloat  = 50
+    
+    public var nonSquareCropRatio: CGFloat = 1
+    
+    var currentCropRatio: CropRatio = {
+        if YPConfig.library.useSquareCropAsDefault {
+            return .square
+        } else {
+            return .nonSquare
+        }
+    }() {
+        didSet {
+            assetViewContainer.squareCropButton.setImage(currentCropRatio.icon, for: .normal)
+            handleCropRatioChange(into: currentCropRatio)
+        }
+    }
     
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var assetZoomableView: YPAssetZoomableView!
     @IBOutlet weak var assetViewContainer: YPAssetViewContainer!
     @IBOutlet weak var assetViewContainerConstraintTop: NSLayoutConstraint!
     @IBOutlet weak var zoomableViewAspectRatioConstraint: NSLayoutConstraint!
-    @IBOutlet weak var zoomableViewEqualWidthConstraint: NSLayoutConstraint!
+    @IBOutlet var zoomableViewEqualWidthConstraint: NSLayoutConstraint!
+    @IBOutlet var zoomableViewEqualHeightConstraint: NSLayoutConstraint!
     
     let maxNumberWarningView = UIView()
     let maxNumberWarningLabel = UILabel()
@@ -44,23 +58,7 @@ final class YPLibraryView: UIView {
         
         setupMaxNumberOfItemsView()
         setupProgressBarView()
-        assetViewContainer.cropRatioDidChangeHandler = { [unowned self] ratio in
-            self.currentRatio = ratio
-            guard let height = self.assetZoomableView?.frame.size.height else { return }
-            let widthOffset = height - height * ratio
-            self.zoomableViewEqualWidthConstraint.constant = -widthOffset
-            self.zoomableViewAspectRatioConstraint.constant = ratio
-            UIView.animate(
-                withDuration: 0.2,
-                delay: 0,
-                options: .curveEaseOut,
-                animations:
-            {
-                self.layoutIfNeeded()
-            })
-            self.assetZoomableView.fitImage(withCropRatio: ratio)
-        }
-        
+        assetViewContainer.squareCropButton.setImage(currentCropRatio.icon, for: .normal)
         assetViewContainer.backgroundColor = YPConfig.colors.libraryScreenBackgroundColor
     }
     
@@ -167,5 +165,80 @@ extension YPLibraryView {
     func cellSize() -> CGSize {
         let size = UIScreen.main.bounds.width/4 * UIScreen.main.scale
         return CGSize(width: size, height: size)
+    }
+}
+
+extension YPLibraryView {
+    
+    enum CropRatio {
+        case square
+        case nonSquare
+        
+        var ratio: CGFloat {
+            switch self {
+            case .square:
+                return 1
+            case .nonSquare:
+                return YPConfig.library.nonSquareCropRatio ?? 1
+            }
+        }
+        
+        var opposite: Self {
+            switch self {
+            case .square:
+                return .nonSquare
+            case .nonSquare:
+                return .square
+            }
+        }
+        
+        var icon: UIImage {
+            switch self {
+            case .square:
+                return YPConfig.icons.cropIconSquare
+            case .nonSquare:
+                return YPConfig.icons.cropIconNonsquare
+            }
+        }
+    }
+}
+
+private extension YPLibraryView {
+    func valueOfCropRatio(_ cropRatio: CropRatio) -> CGFloat {
+        switch cropRatio {
+        case .square:
+            return 1
+        case .nonSquare:
+            return nonSquareCropRatio
+        }
+    }
+    
+    func handleCropRatioChange(into cropRatio: CropRatio) {
+        guard
+            let height = assetZoomableView?.frame.size.height,
+            let width = assetZoomableView?.frame.size.width
+        else {
+            return
+        }
+        
+        let ratioValue = valueOfCropRatio(cropRatio)
+        if ratioValue >= 1 {  // w >= h, a wide / square image
+            let heightOffset = width - width / ratioValue
+            zoomableViewEqualHeightConstraint.constant = -heightOffset
+            zoomableViewEqualWidthConstraint.constant = 0
+        } else {  // w < h, a long image
+            let widthOffset = height - height * ratioValue
+            zoomableViewEqualWidthConstraint.constant = -widthOffset
+            zoomableViewEqualHeightConstraint.constant = 0
+        }
+        UIView.animate(
+            withDuration: 0.2,
+            delay: 0,
+            options: .curveEaseOut,
+            animations:
+        {
+            self.layoutIfNeeded()
+        })
+        assetZoomableView.fitImage(withCropRatio: ratioValue)
     }
 }

@@ -171,6 +171,10 @@ public struct YPConfigLibrary {
     /// Sets the cropping style to square or not. Ignored if `onlySquare` is true. Defaults to true.
     public var isSquareByDefault = true
     
+    /// Whether the non-square crop ratio (w/h) can be inverted (into h/w) according to
+    /// the ratio of the image.
+    public var nonSquareAdaptsImageRatio = false
+    
     /// Choose what media types are available in the library. Defaults to `.photo`
     public var mediaType = YPlibraryMediaType.photo
 

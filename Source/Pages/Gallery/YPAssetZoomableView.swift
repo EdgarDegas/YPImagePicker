@@ -146,17 +146,16 @@ final class YPAssetZoomableView: UIScrollView {
         self.zoomScale = 1
         
         // Calculating and setting the image view frame depending on screenWidth
-        let boundsHeight = UIScreen.main.bounds.width
         let w = image.size.width
         let h = image.size.height
         let aspectRatio = w / h
         
         if w > h * cropRatio {
-            let height = boundsHeight
+            let height = bounds.height
             view.frame.size.height = height
             view.frame.size.width = height * aspectRatio
         } else {
-            let width = boundsHeight * cropRatio
+            let width = bounds.width
             view.frame.size.width = width
             view.frame.size.height = width / aspectRatio
         }
