@@ -16,24 +16,21 @@ final class YPLibraryView: UIView {
     
     public var nonSquareCropRatio: CGFloat = 1
     
-    var currentCropRatio: CropRatio = {
-        if YPConfig.library.useSquareCropAsDefault {
-            return .square
-        } else {
-            return .nonSquare
-        }
-    }() {
+    var currentCropRatio: CropRatio = .square {
         didSet {
-            assetViewContainer.squareCropButton.setImage(currentCropRatio.icon, for: .normal)
-            handleCropRatioChange(into: currentCropRatio)
+            recrop()
         }
+    }
+    
+    func recrop() {
+        assetViewContainer.squareCropButton.setImage(currentCropRatio.icon, for: .normal)
+        handleCropRatioChange(into: currentCropRatio)
     }
     
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var assetZoomableView: YPAssetZoomableView!
     @IBOutlet weak var assetViewContainer: YPAssetViewContainer!
     @IBOutlet weak var assetViewContainerConstraintTop: NSLayoutConstraint!
-    @IBOutlet weak var zoomableViewAspectRatioConstraint: NSLayoutConstraint!
     @IBOutlet var zoomableViewEqualWidthConstraint: NSLayoutConstraint!
     @IBOutlet var zoomableViewEqualHeightConstraint: NSLayoutConstraint!
     
@@ -215,8 +212,8 @@ private extension YPLibraryView {
     
     func handleCropRatioChange(into cropRatio: CropRatio) {
         guard
-            let height = assetZoomableView?.frame.size.height,
-            let width = assetZoomableView?.frame.size.width
+            let height = assetViewContainer?.frame.size.height,
+            let width = assetViewContainer?.frame.size.width
         else {
             return
         }
@@ -232,7 +229,7 @@ private extension YPLibraryView {
             zoomableViewEqualHeightConstraint.constant = 0
         }
         UIView.animate(
-            withDuration: 0.2,
+            withDuration: 0.15,
             delay: 0,
             options: .curveEaseOut,
             animations:

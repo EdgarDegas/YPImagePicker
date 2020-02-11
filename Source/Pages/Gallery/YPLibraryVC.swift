@@ -98,6 +98,14 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
+        v.nonSquareCropRatio = YPConfig.library.nonSquareCropRatio ?? 1
+        
+        if YPConfig.library.useSquareCropAsDefault {
+            v.currentCropRatio = .square
+        } else {
+            v.currentCropRatio = .nonSquare
+        }
+        
         // When crop area changes in multiple selection mode,
         // we need to update the scrollView values in order to restore
         // them when user selects a previously selected item.
@@ -117,8 +125,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             .addTarget(self,
                        action: #selector(squareCropButtonTapped),
                        for: .touchUpInside)
-        
-        v.nonSquareCropRatio = YPConfig.library.nonSquareCropRatio ?? 1
         
         // Forces assetZoomableView to have a contentSize.
         // otherwise 0 in first selection triggering the bug : "invalid image size 0x0"
@@ -289,30 +295,33 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
             self.updateCropInfo()
         }
         
-        DispatchQueue.global(qos: .userInitiated).async {
-            switch asset.mediaType {
-            case .image:
-                DispatchQueue.main.async {
-                    self.updateCropRatioForNewAsset(asset)
+        switch asset.mediaType {
+        case .image:
+            DispatchQueue.main.async {
+                self.updateCropRatioForNewAsset(asset)
+                self.v.recrop()
+                DispatchQueue.global(qos: .userInitiated).async {
+                    self.v.assetZoomableView.setImage(
+                        asset,
+                        mediaManager: self.mediaManager,
+                        storedCropPosition: self.fetchStoredCrop(),
+                        cropRatio: self.v.currentCropRatio.ratio,
+                        completion: completion)
                 }
-                self.v.assetZoomableView.setImage(
-                    asset,
-                    mediaManager: self.mediaManager,
-                    storedCropPosition: self.fetchStoredCrop(),
-                    cropRatio: self.v.currentCropRatio.ratio,
-                    completion: completion)
-            case .video:
+            }
+        case .video:
+            DispatchQueue.global(qos: .userInitiated).async {
                 self.v.assetZoomableView.setVideo(
                     asset,
                     mediaManager: self.mediaManager,
                     storedCropPosition: self.fetchStoredCrop(),
                     cropRatio: self.v.currentCropRatio.ratio,
                     completion: completion)
-            case .audio, .unknown:
-                ()
-            @unknown default:
-                fatalError()
             }
+        case .audio, .unknown:
+            ()
+        @unknown default:
+            fatalError()
         }
     }
     
@@ -509,10 +518,6 @@ public class YPLibraryVC: UIViewController, YPPermissionCheckable {
 
 private extension YPLibraryVC {
     func updateCropRatioForNewAsset(_ asset: PHAsset) {
-        if selection.count < 1 {
-            // If no image is selected, but only previewing:
-            v.currentCropRatio = .square
-        }
         updateNonSquareCropRatioIfNeeded(asset)
     }
     
@@ -521,10 +526,9 @@ private extension YPLibraryVC {
     func updateNonSquareCropRatioIfNeeded(_ asset: PHAsset) {
         let nonSquareCropRatio = YPConfig.library.nonSquareCropRatio ?? 1
         guard  // This is the first image, config requires adaption:
-            selection.count == 1,
+            selection.count <= 1,
             YPConfig.library.nonSquareAdaptsImageRatio
         else {
-            v.nonSquareCropRatio = nonSquareCropRatio
             return
         }
         let assetIsWide = asset.pixelWidth > asset.pixelHeight
